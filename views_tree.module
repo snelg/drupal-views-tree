@@ -15,8 +15,16 @@ function views_tree_views_api() {
  */
 function views_tree_theme($existing, $type, $theme, $path) {
   return array(
+    'views_tree' => array(
+      'variables' => array(
+        'view' => NULL,
+        'options' => array(),
+        'rows' => array(),
+        'title' => NULL,
+      ),
+    ),
     'views_tree_inner' => array(
-      'arguments' => array(
+      'variables' => array(
         'view' => NULL,
         'options' => array(),
         'rows' => array(),
@@ -37,7 +45,12 @@ function views_tree_theme($existing, $type, $theme, $path) {
  * @ingroup themeable
  * @link http://drupal.org/node/355919
  */
-function theme_views_tree($view, $options, $rows, $title) {
+function theme_views_tree($variables) {
+  $view = $variables['view'];
+  $options = $variables['options'];
+  $rows = $variables['rows'];
+  $title = $variables['title'];
+
   $result = $view->result;
   $fields = &$view->field;
 
@@ -56,7 +69,17 @@ function theme_views_tree($view, $options, $rows, $title) {
     }
   }
 
-  return $title . theme('views_tree_inner', $view, $options, $rows, $title, $result, 0);
+  $tree = theme('views_tree_inner', array(
+    'view' => $view,
+    'options' => $options,
+    'rows' => $rows,
+    'title' => $title,
+    'result' => $result,
+    'parent' => 0,
+    )
+  );
+
+  return $title . $tree;
 }
 
 /**
@@ -72,12 +95,20 @@ function theme_views_tree($view, $options, $rows, $title) {
  * @param $parent
  *   The id of the parent entry in the call stack.
  */
-function theme_views_tree_inner($view, $options, $rows, $title, $result, $parent = NULL) {
+function theme_views_tree_inner($variables) {
+  $view = $variables['view'];
+  $options = $variables['options'];
+  $rows = $variables['rows'];
+  $title = $variables['title'];
+  $result = $variables['result'];
+  $parent = $variables['parent'];
+
   $items = array();
   foreach ($result as $i => $record) {
     if ($record->$options['parent_field_property'] == $parent) {
-      $items[] = $rows[$i] . call_user_func(__FUNCTION__, $view, $options, $rows, $title, $result, $record->$options['main_field_property']);
+      $variables['parent'] = $record->$options['main_field_property'];
+      $items[] = $rows[$i] . call_user_func(__FUNCTION__, $variables);
     }
   }
-  return count($items) ? theme('item_list', $items, NULL, $options['type']) : '';
+  return count($items) ? theme('item_list', array('items' => $items, 'type' => $options['type'])) : '';
 }

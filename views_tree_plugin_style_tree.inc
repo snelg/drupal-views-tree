@@ -17,7 +17,6 @@ class views_tree_plugin_style_tree extends views_plugin_style_list {
    */
   function option_definition() {
     $options = parent::option_definition();
-
     $options['main_field'] = array('default' => '');
     $options['parent_field'] = array('default' => '');
 
@@ -29,7 +28,7 @@ class views_tree_plugin_style_tree extends views_plugin_style_list {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    watchdog(WATCHDOG_DEBUG, __FILE .': '. __LINE__);
+
     $fields = array('' => t('<None>'));
 
     foreach ($this->display->handler->get_handlers('field') as $field => $handler) {
@@ -44,6 +43,10 @@ class views_tree_plugin_style_tree extends views_plugin_style_list {
     $events = array('click' => t('On Click'), 'mouseover' => t('On Mouseover'));
 
     $form['type']['#description'] = t('Whether to use an ordered or unordered list for the retrieved items. Most use cases will prefer Unordered.');
+
+    // Unused by the views tree module at this time.
+    unset($form['wrapper_class']);
+    unset($form['class']);
 
     $form['main_field'] = array(
       '#type' => 'select',
