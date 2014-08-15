@@ -21,6 +21,7 @@ class views_tree_plugin_style_tree extends views_plugin_style_list {
     $options['wrapper_class'] = array('default' => 'item-list');
     $options['main_field'] = array('default' => '');
     $options['parent_field'] = array('default' => '');
+    $options['collapsible_tree'] = array('default' => 0);
 
     return $options;
   }
@@ -65,6 +66,17 @@ class views_tree_plugin_style_tree extends views_plugin_style_list {
       '#options' => $fields,
       '#default_value' => $this->options['parent_field'],
       '#description' => t('Select the field that contains the unique identifier of the record\'s parent.'),
+    );
+
+    $form['collapsible_tree'] = array(
+      '#type' => 'radios',
+      '#title' => t('Collapsible view'),
+      '#default_value' => $this->options['collapsible_tree'],
+      '#options' => array(
+        0 => t('Off'),
+        'expanded' => t('Expanded'),
+        'collapsed' => t('Collapsed'),
+      ),
     );
   }
 }

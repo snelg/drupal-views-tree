@@ -100,7 +100,11 @@ function theme_views_tree($variables) {
     'parent' => 0,
     )
   );
-
+  if (!empty($options['collapsible_tree'])) {
+    drupal_add_js(array('views_tree_setting' => array($view->name => $options['collapsible_tree'])), 'setting');
+    drupal_add_js(drupal_get_path('module', 'views_tree')."/js/collapsible.js");
+    drupal_add_css(drupal_get_path('module', 'views_tree')."/css/collapsible.css");
+  }
   return $title . $tree;
 }
 
