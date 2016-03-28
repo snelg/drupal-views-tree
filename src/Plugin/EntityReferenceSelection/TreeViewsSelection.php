@@ -2,10 +2,15 @@
 
 namespace Drupal\views_tree\Plugin\EntityReferenceSelection;
 
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\views\Plugin\EntityReferenceSelection\ViewsSelection;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
+use Drupal\views_tree\Tree;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'selection' entity_reference.
@@ -18,6 +23,33 @@ use Drupal\views\ViewExecutable;
  * )
  */
 class TreeViewsSelection extends ViewsSelection {
+
+  /**
+   * @var \Drupal\views_tree\Tree
+   */
+  protected $tree;
+
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, Tree $tree) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager, $module_handler, $current_user);
+
+    $this->tree = $tree;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity.manager'),
+      $container->get('module_handler'),
+      $container->get('current_user'),
+      $container->get('views_tree.tree')
+    );
+  }
+
 
   /**
    * {@inheritdoc}
@@ -34,8 +66,7 @@ class TreeViewsSelection extends ViewsSelection {
 
 
     $this->applyTreeOnResult($this->view, $this->view->result);
-    $groups = $this->groupResultByParent($this->view->result);
-    $tree = $this->getTreeFromResult($groups);
+    $tree = $this->tree->getTreeFromResult($this->view->result);
 
     $return = [];
     if ($result) {
@@ -98,34 +129,6 @@ class TreeViewsSelection extends ViewsSelection {
         return $row;
       }
     }
-  }
-
-  /**
-   * @param \Drupal\views\ResultRow[] $result
-   *
-   * @return array
-   */
-  protected function getTreeFromResult(array $groups, $current_group = '0') {
-    $return = [];
-
-    if (empty($groups[$current_group])) {
-      return $return;
-    }
-
-    foreach ($groups[$current_group] as $item) {
-      $return[$current_group][] = $item;
-      $return[$current_group] = array_merge($return[$current_group], $this->getTreeFromResult($groups, $item->views_tree_main));
-    }
-    return $return;
-  }
-
-  protected function groupResultByParent(array $result) {
-    $return = [];
-
-    foreach ($result as $row) {
-      $return[$row->views_tree_parent][] = $row;
-    }
-    return $return;
   }
 
 }

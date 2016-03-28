@@ -1,0 +1,3 @@
+services:
+  views_tree.tree:
+    class: \Drupal\views_tree\Tree
