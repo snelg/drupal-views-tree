@@ -5,35 +5,33 @@
  * Views Tree module.
  */
 
-use Drupal\views\Plugin\views\field\FieldPluginBase;
-
 /**
  * Implements hook_theme().
  */
 function views_tree_theme($existing, $type, $theme, $path) {
   // @todo use templates.
-  return array(
-    'views_tree' => array(
-      'variables' => array(
+  return [
+    'views_tree' => [
+      'variables' => [
         'view' => NULL,
-        'options' => array(),
-        'rows' => array(),
+        'options' => [],
+        'rows' => [],
         'title' => NULL,
-      ),
+      ],
       'function' => 'theme_views_tree',
-    ),
-    'views_tree_inner' => array(
-      'variables' => array(
+    ],
+    'views_tree_inner' => [
+      'variables' => [
         'view' => NULL,
-        'options' => array(),
-        'rows' => array(),
+        'options' => [],
+        'rows' => [],
         'title' => NULL,
-        'result' => array(),
+        'result' => [],
         'parent' => NULL,
-      ),
+      ],
       'function' => 'theme_views_tree_inner',
-    ),
-  );
+    ],
+  ];
 }
 
 function template_preprocess_views_tree(&$vars) {
@@ -105,14 +103,12 @@ function theme_views_tree($variables) {
  *   The id of the parent entry in the call stack.
  */
 function theme_views_tree_inner($variables) {
-  $view = $variables['view'];
   $options = $variables['options'];
   $rows = $variables['rows'];
-  $title = $variables['title'];
   $result = $variables['result'];
   $parent = $variables['parent'];
 
-  $items = array();
+  $items = [];
   foreach ($result as $i => $record) {
     if ($record->views_tree_parent == $parent) {
       $variables['parent'] = $record->views_tree_main;

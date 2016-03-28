@@ -16,15 +16,15 @@ class ViewsResultTreeValues {
     $fields = $view->field;
     $options = $view->getStyle()->options;
 
-    $parents = array();
+    $parents = [];
 
     if (!$fields[$options['main_field']] instanceof FieldPluginBase) {
-      drupal_set_message(t('Main field is invalid: %field', array('%field' => $options['main_field'])), 'error');
+      drupal_set_message(t('Main field is invalid: %field', ['%field' => $options['main_field']]), 'error');
       return '';
     }
 
     if (!$fields[$options['parent_field']] instanceof FieldPluginBase) {
-      drupal_set_message(t('Parent field is invalid: %field', array('%field' => $options['parent_field'])), 'error');
+      drupal_set_message(t('Parent field is invalid: %field', ['%field' => $options['parent_field']]), 'error');
       return '';
     }
 
@@ -104,7 +104,7 @@ class ViewsResultTreeValues {
       if (isset($field->field_info['columns'])) {
         $columns = array_keys($field->field_info['columns']);
         foreach ($columns as $column) {
-          if (in_array($column, array('target_id', 'nid', 'uid', 'tid'))) {
+          if (in_array($column, ['target_id', 'nid', 'uid', 'tid'])) {
             $field_property = $column;
             break;
           }

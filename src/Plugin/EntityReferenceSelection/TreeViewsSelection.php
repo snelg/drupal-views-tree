@@ -65,7 +65,7 @@ class TreeViewsSelection extends ViewsSelection {
     $handler_settings = $this->configuration['handler_settings'];
     $display_name = $handler_settings['view']['display_name'];
     $arguments = $handler_settings['view']['arguments'];
-    $result = array();
+    $result = [];
     if ($this->initializeView($match, $match_operator, $limit)) {
       // Get the results.
       $result = $this->view->executeDisplay($display_name, $arguments);

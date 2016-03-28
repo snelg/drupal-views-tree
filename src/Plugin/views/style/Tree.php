@@ -46,11 +46,11 @@ class Tree extends HtmlList {
   protected function defineOptions() {
     $options = parent::defineOptions();
 
-    $options['class'] = array('default' => '');
-    $options['wrapper_class'] = array('default' => 'item-list');
-    $options['main_field'] = array('default' => '');
-    $options['parent_field'] = array('default' => '');
-    $options['collapsible_tree'] = array('default' => 0);
+    $options['class'] = ['default' => ''];
+    $options['wrapper_class'] = ['default' => 'item-list'];
+    $options['main_field'] = ['default' => ''];
+    $options['parent_field'] = ['default' => ''];
+    $options['collapsible_tree'] = ['default' => 0];
 
     return $options;
   }
@@ -61,13 +61,13 @@ class Tree extends HtmlList {
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
-    $fields = array('' => t('<None>'));
+    $fields = ['' => t('<None>')];
 
     foreach ($this->displayHandler->getHandlers('field') as $field => $handler) {
       $fields[$field] = $handler->adminLabel();
     }
 
-    $events = array('click' => t('On Click'), 'mouseover' => t('On Mouseover'));
+    $events = ['click' => t('On Click'), 'mouseover' => t('On Mouseover')];
 
     $form['type']['#description'] = t('Whether to use an ordered or unordered list for the retrieved items. Most use cases will prefer Unordered.');
 
@@ -75,33 +75,33 @@ class Tree extends HtmlList {
     unset($form['wrapper_class']);
     unset($form['class']);
 
-    $form['main_field'] = array(
+    $form['main_field'] = [
       '#type' => 'select',
       '#title' => t('Main field'),
       '#options' => $fields,
       '#default_value' => $this->options['main_field'],
       '#description' => t('Select the field with the unique identifier for each record.'),
       '#required' => TRUE,
-    );
+    ];
 
-    $form['parent_field'] = array(
+    $form['parent_field'] = [
       '#type' => 'select',
       '#title' => t('Parent field'),
       '#options' => $fields,
       '#default_value' => $this->options['parent_field'],
       '#description' => t('Select the field that contains the unique identifier of the record\'s parent.'),
-    );
+    ];
 
-    $form['collapsible_tree'] = array(
+    $form['collapsible_tree'] = [
       '#type' => 'radios',
       '#title' => t('Collapsible view'),
       '#default_value' => $this->options['collapsible_tree'],
-      '#options' => array(
+      '#options' => [
         0 => t('Off'),
         'expanded' => t('Expanded'),
         'collapsed' => t('Collapsed'),
-      ),
-    );
+      ],
+    ];
   }
 
 }

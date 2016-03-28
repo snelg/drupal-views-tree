@@ -30,7 +30,7 @@ class TreeERSelection extends Tree {
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['search_fields'] = array('default' => NULL);
+    $options['search_fields'] = ['default' => NULL];
 
     return $options;
   }
