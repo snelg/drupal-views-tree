@@ -5,20 +5,13 @@
  * Views Tree module.
  */
 
-/**
- * Implements hook_views_api().
- */
-function views_tree_views_api() {
-  return array(
-    'api' => '3',
-    'path' => drupal_get_path('module', 'views_tree'),
-  );
-}
+use Drupal\views\Plugin\views\field\FieldPluginBase;
 
 /**
  * Implements hook_theme().
  */
 function views_tree_theme($existing, $type, $theme, $path) {
+  // @todo use templates.
   return array(
     'views_tree' => array(
       'variables' => array(
@@ -27,6 +20,7 @@ function views_tree_theme($existing, $type, $theme, $path) {
         'rows' => array(),
         'title' => NULL,
       ),
+      'function' => 'theme_views_tree',
     ),
     'views_tree_inner' => array(
       'variables' => array(
@@ -37,9 +31,28 @@ function views_tree_theme($existing, $type, $theme, $path) {
         'result' => array(),
         'parent' => NULL,
       ),
+      'function' => 'theme_views_tree_inner',
     ),
   );
 }
+
+function template_preprocess_views_tree(&$vars) {
+  /** @var \Drupal\views\ViewExecutable $view */
+  $view = $vars['view'];
+  $options = $view->getStyle()->options;
+  $vars['#attached']['library'][] = 'views_tree/views_tree';
+
+  // Add JS and CSS for collapsible tree, if configured.
+  if (!empty($options['collapsible_tree'])) {
+    $vars['#attached']['drupalSettings'] = [
+      'views_tree_settings' => [[
+        $view->id(),
+        $options['collapsible_tree'],
+      ],
+    ]];
+  }
+}
+
 
 /**
  * Theme function for the tree style plugin.
@@ -51,8 +64,9 @@ function views_tree_theme($existing, $type, $theme, $path) {
  * @link http://drupal.org/node/355919
  */
 function theme_views_tree($variables) {
+  /** @var \Drupal\views\ViewExecutable $view */
   $view = $variables['view'];
-  $options = $variables['options'];
+  $options = $view->getStyle()->options;
   $rows = $variables['rows'];
   $title = $variables['title'];
 
@@ -61,12 +75,12 @@ function theme_views_tree($variables) {
 
   $parents = array();
 
-  if (! $fields[$options['main_field']] instanceof views_handler_field) {
+  if (! $fields[$options['main_field']] instanceof FieldPluginBase) {
     drupal_set_message(t('Main field is invalid: %field', array('%field' => $options['main_field'])), 'error');
     return '';
   }
 
-  if (! $fields[$options['parent_field']] instanceof views_handler_field) {
+  if (! $fields[$options['parent_field']] instanceof FieldPluginBase) {
     drupal_set_message(t('Parent field is invalid: %field', array('%field' => $options['parent_field'])), 'error');
     return '';
   }
@@ -81,8 +95,8 @@ function theme_views_tree($variables) {
   // build up a list of all main keys in the result set so that we can normalize
   // top-level records below.
   foreach ($result as $i => $record) {
-    $result[$i]->views_tree_main = views_tree_normalize_key($fields[$options['main_field']]->get_value($record), $fields[$options['main_field']]);
-    $result[$i]->views_tree_parent = views_tree_normalize_key($fields[$options['parent_field']]->get_value($record), $fields[$options['parent_field']]);
+    $result[$i]->views_tree_main = views_tree_normalize_key($fields[$options['main_field']]->getValue($record), $fields[$options['main_field']]);
+    $result[$i]->views_tree_parent = views_tree_normalize_key($fields[$options['parent_field']]->getValue($record), $fields[$options['parent_field']]);
 
     $parents[] = $record->views_tree_main;
   }
@@ -96,26 +110,17 @@ function theme_views_tree($variables) {
   }
 
   // Recursively render each item.
-  $tree = theme('views_tree_inner', array(
-    'view' => $view,
-    'options' => $options,
-    'rows' => $rows,
-    'title' => $title,
-    'result' => $result,
-    'parent' => 0,
-    )
-  );
+  $build = [
+    '#theme' => 'views_tree_inner',
+    '#view' => $view,
+    '#options' => $options,
+    '#rows' => $rows,
+    '#title' => $title,
+    '#result' => $result,
+    '#parent' => 0,
+  ];
+  $tree = \Drupal::service('renderer')->render($build);
 
-  // Add JS and CSS for collapsible tree, if configured.
-  if (!empty($options['collapsible_tree'])) {
-    drupal_add_js(array(
-      'views_tree_setting' => array(
-        $view->name => $options['collapsible_tree'],
-      ),
-    ), 'setting');
-    drupal_add_js(drupal_get_path('module', 'views_tree') . '/js/collapsible.js');
-    drupal_add_css(drupal_get_path('module', 'views_tree') . '/css/collapsible.css');
-  }
   return $title . $tree;
 }
 
@@ -144,10 +149,16 @@ function theme_views_tree_inner($variables) {
   foreach ($result as $i => $record) {
     if ($record->views_tree_parent == $parent) {
       $variables['parent'] = $record->views_tree_main;
-      $items[] = $rows[$i] . call_user_func(__FUNCTION__, $variables);
+      $rows[$i]['#suffix'] = call_user_func(__FUNCTION__, $variables);
+      $items[] = $rows[$i];
     }
   }
-  return count($items) ? theme('item_list', array('items' => $items, 'type' => $options['type'])) : '';
+  $build = [
+    '#theme' => 'item_list',
+    '#type' => $options['type'],
+    '#items' => $items,
+  ];
+  return count($items) ? \Drupal::service('renderer')->render($build) : '';
 }
 
 /**
@@ -164,13 +175,14 @@ function theme_views_tree_inner($variables) {
  *   The value to normalize. It should be either an int or an array. If an int,
  *   it is returned unaltered. If it's an array, we extract the int we want and
  *   return that.
- * @param views_handler_field $field
+ * @param \Drupal\views\Plugin\views\field\FieldPluginBase $field
  *   Metadata about the field we are extracting information from.
  * @return int
  *   The value of this key, normalized to an int.
  */
-function views_tree_normalize_key($value, views_handler_field $field) {
+function views_tree_normalize_key($value, FieldPluginBase $field) {
   if (is_array($value) && count($value)) {
+    // @todo convert this part to Drupal 8.
     if (isset($field->field_info['columns'])) {
       $columns = array_keys($field->field_info['columns']);
       foreach ($columns as $column) {
