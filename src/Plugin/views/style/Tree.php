@@ -9,7 +9,6 @@ namespace Drupal\views_tree\Plugin\views\style;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\style\HtmlList;
-use Drupal\views\Plugin\views\style\StylePluginBase;
 
 /**
  * Style plugin to render each item as hierarchy.
