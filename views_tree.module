@@ -18,23 +18,12 @@ function views_tree_theme($existing, $type, $theme, $path) {
         'rows' => [],
         'title' => NULL,
       ],
-      'function' => 'theme_views_tree',
-    ],
-    'views_tree_inner' => [
-      'variables' => [
-        'view' => NULL,
-        'options' => [],
-        'rows' => [],
-        'title' => NULL,
-        'result' => [],
-        'parent' => NULL,
-      ],
-      'function' => 'theme_views_tree_inner',
     ],
   ];
 }
 
 function template_preprocess_views_tree(&$vars) {
+  $rows = $vars['rows'];
   /** @var \Drupal\views\ViewExecutable $view */
   $view = $vars['view'];
   $options = $view->getStyle()->options;
@@ -49,77 +38,28 @@ function template_preprocess_views_tree(&$vars) {
       ],
     ]];
   }
-}
 
-
-/**
- * Theme function for the tree style plugin.
- *
- * We need to do some weirdness that makes more sense as a theme function than
- * as a template.
- *
- * @ingroup themeable
- * @link http://drupal.org/node/355919
- */
-function theme_views_tree($variables) {
-  $tree_values = new \Drupal\views_tree\ViewsResultTreeValues();
-
-  /** @var \Drupal\views\ViewExecutable $view */
-  $view = $variables['view'];
-  $options = $view->getStyle()->options;
-  $rows = $variables['rows'];
-  $title = $variables['title'];
-
+  /** @var \Drupal\views_tree\ViewsResultTreeValues $tree_values */
+  $tree_values = \Drupal::service('views_tree.views_tree_values');
+  /** @var \Drupal\views_tree\Tree $tree */
+  $tree = \Drupal::service('views_tree.tree');
   $result = $view->result;
 
   $tree_values->setTreeValues($view, $result);
+  $result_tree = $tree->getTreeFromResult($result);
 
-  // Recursively render each item.
-  $build = [
-    '#theme' => 'views_tree_inner',
-    '#view' => $view,
-    '#options' => $options,
-    '#rows' => $rows,
-    '#title' => $title,
-    '#result' => $result,
-    '#parent' => 0,
-  ];
-  $tree = \Drupal::service('renderer')->render($build);
+  $tree->getItemsTreeFromResultTree($result_tree, $rows);
 
-  return $title . $tree;
+//  $items = [];
+//  foreach ($result as $i => $record) {
+//    if ($record->views_tree_parent == $parent) {
+//      $variables['parent'] = $record->views_tree_main;
+//      $rows[$i]['#suffix'] = call_user_func(__FUNCTION__, $variables);
+//      $items[] = $rows[$i];
+//    }
+//  }
+
+  $vars['#options'] = $options;
+  $vars['#items'] = $items;
 }
 
-/**
- * Inner recursive theme function for views tree theming.
- *
- * @ingroup themeable
- * @param $view
- * @param $options
- * @param $row
- * @param $title
- * @param $result
- *   An array representing the raw data returned from the query.
- * @param $parent
- *   The id of the parent entry in the call stack.
- */
-function theme_views_tree_inner($variables) {
-  $options = $variables['options'];
-  $rows = $variables['rows'];
-  $result = $variables['result'];
-  $parent = $variables['parent'];
-
-  $items = [];
-  foreach ($result as $i => $record) {
-    if ($record->views_tree_parent == $parent) {
-      $variables['parent'] = $record->views_tree_main;
-      $rows[$i]['#suffix'] = call_user_func(__FUNCTION__, $variables);
-      $items[] = $rows[$i];
-    }
-  }
-  $build = [
-    '#theme' => 'item_list',
-    '#type' => $options['type'],
-    '#items' => $items,
-  ];
-  return count($items) ? \Drupal::service('renderer')->render($build) : '';
-}
