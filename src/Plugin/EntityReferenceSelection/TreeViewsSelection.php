@@ -6,10 +6,10 @@ use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\views\Plugin\EntityReferenceSelection\ViewsSelection;
-use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
 use Drupal\views_tree\Tree;
+use Drupal\views_tree\ViewsResultTreeValues;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -29,10 +29,16 @@ class TreeViewsSelection extends ViewsSelection {
    */
   protected $tree;
 
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, Tree $tree) {
+  /**
+   * @var \Drupal\views_tree\ViewsResultTreeValues
+   */
+  protected $viewsResultTreeValues;
+
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, Tree $tree, ViewsResultTreeValues $views_result_tree_values) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager, $module_handler, $current_user);
 
     $this->tree = $tree;
+    $this->viewsResultTreeValues = $views_result_tree_values;
   }
 
   /**
@@ -46,7 +52,8 @@ class TreeViewsSelection extends ViewsSelection {
       $container->get('entity.manager'),
       $container->get('module_handler'),
       $container->get('current_user'),
-      $container->get('views_tree.tree')
+      $container->get('views_tree.tree'),
+      $container->get('views_tree.views_tree_values')
     );
   }
 
@@ -86,49 +93,7 @@ class TreeViewsSelection extends ViewsSelection {
    * @return string
    */
   protected function applyTreeOnResult(ViewExecutable $view, array $result) {
-    $fields = $view->field;
-    $options = $view->getStyle()->options;
-
-    // @todo Extract this and the logic in \theme_views_tree into its own helper
-    if (! $fields[$options['main_field']] instanceof FieldPluginBase) {
-      drupal_set_message(t('Main field is invalid: %field', array('%field' => $options['main_field'])), 'error');
-      return '';
-    }
-
-    if (! $fields[$options['parent_field']] instanceof FieldPluginBase) {
-      drupal_set_message(t('Parent field is invalid: %field', array('%field' => $options['parent_field'])), 'error');
-      return '';
-    }
-
-    // Add the parent items to the result.
-    foreach ($result as $row) {
-      $row->views_tree_main = views_tree_normalize_key($fields[$options['main_field']]->getValue($row), $fields[$options['main_field']]);
-      $row->views_tree_parent = views_tree_normalize_key($fields[$options['parent_field']]->getValue($row), $fields[$options['parent_field']]);
-    }
-
-    // Add the depth onto the result.
-    foreach ($result as $row) {
-      $current_row = $row;
-      $depth = 0;
-      while ($current_row->views_tree_parent != '0') {
-        $depth++;
-        if ($parent_row = $this->findRowByParent($result, $current_row->views_tree_parent)) {
-          $current_row = $parent_row;
-        }
-        else {
-          break;
-        }
-      }
-      $row->views_tree_depth = $depth;
-    }
-  }
-
-  protected function findRowByParent(array $result, $parent_id) {
-    foreach ($result as $row) {
-      if ($parent_id == $row->views_tree_main) {
-        return $row;
-      }
-    }
+    $this->viewsResultTreeValues->setTreeValues($view, $result);
   }
 
 }
