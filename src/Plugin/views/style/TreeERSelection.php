@@ -17,7 +17,7 @@ use Drupal\Core\Form\FormStateInterface;
  *
  * @ViewsStyle(
  *   id = "tree_entity_reference_selection",
- *   title = @Translation("Tree (Adjacency model)"),
+ *   title = @Translation("TreeHelper (Adjacency model)"),
  *   help = @Translation("Display the results as a nested tree"),
  *   theme = "views_tree",
  *   display_types = {"entity_reference"},

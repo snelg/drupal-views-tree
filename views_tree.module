@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Views Tree module.
+ * Views tree module.
  */
 
 /**
@@ -41,7 +41,7 @@ function template_preprocess_views_tree(&$vars) {
 
   /** @var \Drupal\views_tree\ViewsResultTreeValues $tree_values */
   $tree_values = \Drupal::service('views_tree.views_tree_values');
-  /** @var \Drupal\views_tree\Tree $tree */
+  /** @var \Drupal\views_tree\TreeHelper $tree */
   $tree = \Drupal::service('views_tree.tree');
   $result = $view->result;
 

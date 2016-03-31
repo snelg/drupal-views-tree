@@ -8,7 +8,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\views\Plugin\EntityReferenceSelection\ViewsSelection;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
-use Drupal\views_tree\Tree;
+use Drupal\views_tree\TreeHelper;
 use Drupal\views_tree\ViewsResultTreeValues;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @EntityReferenceSelection(
  *   id = "views_tree",
- *   label = @Translation("Tree (Adjacency model)"),
+ *   label = @Translation("TreeHelper (Adjacency model)"),
  *   group = "views_tree",
  *   weight = 0
  * )
@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class TreeViewsSelection extends ViewsSelection {
 
   /**
-   * @var \Drupal\views_tree\Tree
+   * @var \Drupal\views_tree\TreeHelper
    */
   protected $tree;
 
@@ -34,7 +34,7 @@ class TreeViewsSelection extends ViewsSelection {
    */
   protected $viewsResultTreeValues;
 
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, Tree $tree, ViewsResultTreeValues $views_result_tree_values) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, TreeHelper $tree, ViewsResultTreeValues $views_result_tree_values) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager, $module_handler, $current_user);
 
     $this->tree = $tree;

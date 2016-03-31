@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\views_tree\Plugin\views\style\Tree.
+ * Contains \Drupal\views_tree\Plugin\views\style\TreeHelper.
  */
 
 namespace Drupal\views_tree\Plugin\views\style;
@@ -17,7 +17,7 @@ use Drupal\views\Plugin\views\style\HtmlList;
  *
  * @ViewsStyle(
  *   id = "tree",
- *   title = @Translation("Tree (Adjacency model)"),
+ *   title = @Translation("TreeHelper (Adjacency model)"),
  *   help = @Translation("Display the results as a nested tree"),
  *   theme = "views_tree",
  *   display_types = {"normal"}
