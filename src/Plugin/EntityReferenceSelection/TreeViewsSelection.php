@@ -77,9 +77,10 @@ class TreeViewsSelection extends ViewsSelection {
 
     $return = [];
     if ($result) {
-      array_walk_recursive($tree, function (ResultRow $row) use (&$return) {
+      $this->tree->applyFunctionToTree($tree, function (ResultRow $row) use (&$return) {
         $entity = $row->_entity;
         $return[$entity->bundle()][$entity->id()] = str_repeat('-', $row->views_tree_depth) . $entity->label();
+        return NULL;
       });
     }
 

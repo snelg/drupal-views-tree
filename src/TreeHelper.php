@@ -15,7 +15,7 @@ class TreeHelper {
    * @param array $result
    *   The views results with views_tree_main and views_tree_parent set.
    *
-   * @return array
+   * @return \Drupal\views_tree\TreeItem
    *   A tree representation.
    */
   public function getTreeFromResult(array $result) {
