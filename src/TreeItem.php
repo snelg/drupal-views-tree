@@ -7,14 +7,16 @@
 
 namespace Drupal\views_tree;
 
-class TreeItem {
+use Traversable;
 
-  public $node;
+class TreeItem implements \IteratorAggregate {
+
+  protected $node;
 
   /**
    * @var \Drupal\views_tree\TreeItem
    */
-  public $leaves = [];
+  protected $leaves = [];
 
   /**
    * Creates a new TreeItem instance.
@@ -46,6 +48,13 @@ class TreeItem {
    */
   public function getLeaves() {
     return $this->leaves;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIterator() {
+    return new \ArrayIterator($this->leaves);
   }
 
   /**

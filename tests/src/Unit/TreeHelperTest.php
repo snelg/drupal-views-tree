@@ -142,4 +142,25 @@ class TreeHelperTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals($expected_tree, $result);
   }
 
+  /**
+   * @covers ::applyFunctionToTree
+   */
+  public function testApplyFunctionToTreeWithNulls() {
+    $tree = new TreeItem(NULL);
+    $tree->addLeave((new TreeItem(2))
+      ->addLeave(NULL)
+      ->addLeave(3.5)
+    );
+
+    $expected_tree = new TreeItem(NULL);
+    $expected_tree->addLeave((new TreeItem(3))
+      ->addLeave(NULL)
+      ->addLeave(4.5)
+    );
+
+    $tree_helper = new TreeHelper();
+    $result = $tree_helper->applyFunctionToTree($tree, function ($i) { return $i + 1; });
+    $this->assertEquals($expected_tree, $result);
+  }
+
 }

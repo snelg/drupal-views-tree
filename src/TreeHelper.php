@@ -7,8 +7,6 @@
 
 namespace Drupal\views_tree;
 
-use Drupal\views\ResultRow;
-
 class TreeHelper {
 
   /**
@@ -50,7 +48,12 @@ class TreeHelper {
   }
 
   public function applyFunctionToTree(TreeItem $tree, callable $callable) {
-    $new_node = $callable($tree->getNode());
+    if (($node = $tree->getNode()) && $node !== NULL) {
+      $new_node = $callable($tree->getNode());
+    }
+    else {
+      $new_node = NULL;
+    }
     $new_tree = new TreeItem($new_node);
     foreach ($tree->getLeaves() as $leave) {
       $new_tree->addLeave($this->applyFunctionToTree($leave, $callable));
