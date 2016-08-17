@@ -13,6 +13,7 @@
           var count = $(this).find("li").size();
           if (count > 0) {
             $(this).addClass('views_tree_parent');
+            $(this).children('ul').addClass("item-list");
             if (views_tree_settings[views_tree_settings_id][1] != "collapsed") {
               $(this).addClass('views_tree_expanded');
               // @todo Use Drupal.theme()

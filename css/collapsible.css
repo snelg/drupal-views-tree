@@ -8,6 +8,7 @@
 .views_tree_link {
   width: 15px;
   height: 100%;
+  clear: both;
   float: left;
 }
 
