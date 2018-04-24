@@ -39,7 +39,11 @@ class ViewsResultTreeValues {
     // top-level records below.
     foreach ($result as $i => $record) {
       $result[$i]->views_tree_main = $this->normalizeKey($fields[$options['main_field']]->getValue($record), $fields[$options['main_field']]);
-      $result[$i]->views_tree_parent = $this->normalizeKey($fields[$options['parent_field']]->getValue($record), $fields[$options['parent_field']]);
+      if (empty($record->_relationship_entities['parent'])) {
+          $result[$i]->views_tree_parent = 0;
+      } else {
+          $result[$i]->views_tree_parent = $this->normalizeKey($fields[$options['parent_field']]->getValue($record), $fields[$options['parent_field']]);
+      }
 
       $parents[] = $record->views_tree_main;
     }
